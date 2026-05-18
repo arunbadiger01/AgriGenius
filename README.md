@@ -1,7 +1,7 @@
 
-# 🌾 AgriVision  
+# 🌾 AgriGenius  
 
-**AgriVision** is a Django-based AI-powered agriculture advisory platform that leverages **machine learning models, real-time APIs,** and **Gemini AI** to empower farmers and agricultural enthusiasts. It offers intelligent recommendations and insights through an easy-to-use web interface.
+**AgriGenius** is a Django-based AI-powered agriculture advisory platform that leverages **machine learning models, real-time APIs,** and **Gemini AI** to empower farmers and agricultural enthusiasts. It offers intelligent recommendations and insights through an easy-to-use web interface.
 
 ## 🌟 Features  
 
