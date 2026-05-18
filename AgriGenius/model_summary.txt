@@ -1,0 +1,318 @@
+\n--- crop_recommend.ipynb ---\n# Data Processing Libraries
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+
+
+# Data Visualization Libraries
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.graph_objects as go
+import plotly.io as pio
+
+
+
+# Feature Selection Libraries
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+
+
+# Machine Learning Algorithms
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+
+
+# Machine Learning Model Evaluation Libraries
+from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn import metrics
+from sklearn import tree
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import make_pipeline
+
+import joblib
+DecisionTree = DecisionTreeClassifier(criterion="entropy",random_state=2,max_depth=7, min_samples_split=10, min_samples_leaf=5)
+
+DecisionTree.fit(Xtrain,Ytrain)
+
+predicted_values = DecisionTree.predict(Xtest)
+x = metrics.accuracy_score(Ytest, predicted_values)
+Model_Accuracies.append(x*100)
+ML_models.append('Decision Tree')
+
+# Comparing Actual vs Predicted
+DT_OutputDF = pd.DataFrame({'Actual': Ytest, 'Predicted': predicted_values}) #Comparing the accurracy  
+print(DT_OutputDF) 
+print("DecisionTrees's Accuracy is: ", x*100)
+
+print(classification_report(Ytest,predicted_values))
+plt.figure(figsize=(20,10))
+sns.heatmap(confusion_matrix(Ytest,predicted_values), annot=True, cmap="Blues")
+plt.show()RF = RandomForestClassifier(n_estimators=100, random_state=0, max_depth=7, min_samples_split=10, min_samples_leaf=5)
+RF.fit(Xtrain,Ytrain)
+
+predicted_values = RF.predict(Xtest)
+
+x = metrics.accuracy_score(Ytest, predicted_values)
+Model_Accuracies.append(x*100)
+ML_models.append('RF')
+RF_OutputDF = pd.DataFrame({'Actual': Ytest, 'Predicted': predicted_values}) #Comparing the accurracy  
+print(RF_OutputDF) 
+print("RF's Accuracy is: ", x*100)
+
+print(classification_report(Ytest,predicted_values))
+plt.figure(figsize=(20,10))
+sns.heatmap(confusion_matrix(Ytest,predicted_values), annot=True, cmap="Blues")
+plt.show()\n--- crop_yield.ipynb ---\nimport pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import joblib
+
+# Load the dataset
+df = pd.read_csv(r"DataSets/crop_production.csv")
+
+# Display basic info
+print(df.head())
+print(df.info())
+print(df.describe())
+
+# Handle missing values
+df = df.dropna()
+
+# Encode categorical variables
+le_state = LabelEncoder()
+le_district = LabelEncoder()
+le_season = LabelEncoder()
+le_crop = LabelEncoder()
+
+df['State_Name'] = le_state.fit_transform(df['State_Name'])
+df['District_Name'] = le_district.fit_transform(df['District_Name'])
+df['Season'] = le_season.fit_transform(df['Season'])
+df['Crop'] = le_crop.fit_transform(df['Crop'])
+
+# Features and target
+X = df[['State_Name', 'District_Name', 'Crop_Year', 'Season', 'Crop', 'Area']]
+y = df['Production']
+
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train the model
+model = RandomForestRegressor(n_estimators=100, random_state=42, max_depth=7, min_samples_split=10, min_samples_leaf=5)
+model.fit(X_train, y_train)
+
+# Evaluate the model
+y_pred = model.predict(X_test)
+print('MAE:', mean_absolute_error(y_test, y_pred))
+print('MSE:', mean_squared_error(y_test, y_pred))
+print('R2:', r2_score(y_test, y_pred))
+
+# Save the model
+joblib.dump(model, 'Crop_Yield.pkl')
+
+print('Model saved')\n--- ferti_recommend.ipynb ---\nimport pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt 
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+# Identify categorical columns
+categorical_features = ['Soil_Type', 'Crop_Type', 'Fertilizer']
+
+# Initialize encoders and mappings
+label_encoders = {}
+mappings = {}
+
+# Encode each categorical column
+for feature in categorical_features:
+    le = LabelEncoder()
+    df[feature] = le.fit_transform(df[feature])  # Encode the column
+    label_encoders[feature] = le  # Store the encoder for decoding later
+    mappings[feature] = {index: label for index, label in enumerate(le.classes_)}  # Store the mapping
+
+# Display the encoded DataFrame
+print("\nEncoded DataFrame:")
+display(df)
+
+# Display the mappings for each categorical column
+print("\nMappings for each categorical column:")
+for feature, mapping in mappings.items():
+    print(f"{feature}: {mapping}")# Identify numerical and categorical columns
+numerical_features = ['Temparature', 'Humidity', 'Moisture', 'Nitrogen', 'Potassium', 'Phosphorous']
+categorical_features = ['Soil_Type', 'Crop_Type', 'Fertilizer']
+
+# Create a MinMaxScaler instance
+scaler = MinMaxScaler(feature_range=(0, 1))
+
+abc = scaler.fit_transform(df[numerical_features])
+
+# Scale only the numerical columns
+scaled_numerical = pd.DataFrame(abc, columns=numerical_features)
+
+# Combine scaled numerical and categorical columns
+df_scaled = pd.concat([scaled_numerical, df[categorical_features].reset_index(drop=True)], axis=1)
+
+# Display the scaled DataFrame
+print("\nDataFrame after Scaling Numerical Columns Only:")
+display(df_scaled)
+#Splitting X and y into trian and test dataset
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test=train_test_split(X,y,test_size=0.3,random_state=101)#Data Modelling
+#logistic Regression Algorithm
+from sklearn.linear_model import LogisticRegression
+logreg=LogisticRegression(random_state=42)
+logreg.fit(X_train,y_train)#knneighbors Algorithm
+#plotting a graph for n neighbors
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import metrics
+
+X_axis=list(range(1,31))
+acc=pd.Series()
+x=range(1,31)
+
+for i in list(range(1, 31)):
+    knn_model = KNeighborsClassifier(n_neighbors=i)
+    knn_model.fit(X_train, y_train)
+    prediction = knn_model.predict(X_test)
+    acc = pd.concat([acc, pd.Series(metrics.accuracy_score(prediction, y_test))], ignore_index=True)
+
+plt.plot(X_axis,acc, color='blue', linestyle='dashed',marker='o', markerfacecolor='red',markersize=10)
+plt.xticks(x)
+plt.title("Finding best value for n_estimators")
+plt.xlabel("n_estimators")
+plt.ylabel("Accuracy")
+plt.grid()
+plt.show()
+print('Highest value:',acc.values.max())#As from the above two graphs the best value for n is 1
+#K nearest neighbors Algorithm
+#metric='minkowski', parameter specifies the distance metric used to measure the distance between points. 
+#'minkowski' is a generalization of the Euclidean and Manhattan distances. It's controlled by another parameter p.
+#p=2:It controls the power parameter for the Minkowski metric. When p=2, it represents the Euclidean distance, and when p=1, it represents the Manhattan distance.
+knn=KNeighborsClassifier(n_neighbors=5,metric='minkowski',p=2)
+knn.fit(X_train,y_train)#Support Vector Classifier Algorithm
+from sklearn.svm import SVC
+svc=SVC(kernel='linear',random_state=42)
+svc.fit(X_train,y_train)#Naive Bayes Algorithm
+from sklearn.naive_bayes import GaussianNB
+nb=GaussianNB()
+nb.fit(X_train,y_train)#Decision tree Algorithm
+from sklearn.tree import DecisionTreeClassifier
+dectree=DecisionTreeClassifier(criterion='entropy',random_state=42, max_depth=5, min_samples_split=20, min_samples_leaf=10)
+#criterion='entropy':Criterion used to measure the quality of a split.Entropy measures the impurity or disorder of a set of labels. 
+#The algorithm aims to minimize entropy, leading to more homogeneous subsets at each node of the tree.
+dectree.fit(X_train,y_train)from sklearn.tree import DecisionTreeClassifier, plot_tree
+import matplotlib.pyplot as plt
+
+# Assuming you have a trained DecisionTreeClassifier model
+dectree = DecisionTreeClassifier(max_depth=2, min_samples_split=30, min_samples_leaf=15)
+dectree.fit(X_train, y_train)
+
+# Visualize the decision tree
+plt.figure(figsize=(20, 10))  # Set the figure size for better visualization
+plot_tree(
+    dectree,
+    filled=True,
+    feature_names=X.columns,
+    class_names=[str(cls) for cls in y_train.unique()]  # Convert classes to strings
+)
+plt.show()
+#Random Forest Algorithm
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+ranfo=RandomForestClassifier(n_estimators=100, criterion='entropy', random_state=42, max_depth=4, min_samples_split=10, min_samples_leaf=5)
+
+# List of values for n_estimators to try
+n_estimators_values = [10, 50, 100, 200, 300]
+
+# Dictionary to store mean cross-validation scores for each n_estimators value
+cv_scores = {}
+
+for n_estimators in n_estimators_values:
+    rf_model = RandomForestClassifier(n_estimators=n_estimators, random_state=42)
+    scores = cross_val_score(rf_model, X_train, y_train, cv=5, scoring='accuracy')
+    cv_scores[n_estimators] = scores.mean()
+
+# Plotting the mean cross-validation scores
+plt.plot(list(cv_scores.keys()), list(cv_scores.values()))
+plt.xlabel('n_estimators')
+plt.ylabel('Mean CV Accuracy')
+plt.title('Cross-Validation Scores for Different n_estimators Values')
+plt.show()#Random Forest Algorithm
+from sklearn.ensemble import RandomForestClassifier
+ranfo=RandomForestClassifier(n_estimators=100, criterion='entropy', random_state=42, max_depth=4, min_samples_split=10, min_samples_leaf=5)
+ranfo.fit(X_train,y_train)#Model Evaluation
+from sklearn.metrics import accuracy_score
+accuracy_logreg=accuracy_score(y_test,y_pred_logreg)
+accuracy_knn=accuracy_score(y_test,y_pred_knn)
+accuracy_dectree=accuracy_score(y_test,y_pred_dectree)
+accuracy_ranfor=accuracy_score(y_test,y_pred_ranfor)#Model Comparison
+models=pd.DataFrame({
+    'Model': ['Logistic Regression', 'KNN', 'Decision Tree', 'Random forest'],
+    'Score': [100*round(accuracy_logreg,4),100*round(accuracy_knn,4),  100*round(accuracy_dectree,4), 100*round(accuracy_ranfor,4)]
+})
+models.sort_values(by='Score',ascending=False)#From the above comparison, we can observe that KNN and Random Forest gets the highest accuracy of 100%
+#Confusion Matrix
+from sklearn.metrics import confusion_matrix
+cm_ranfo=confusion_matrix(y_test,y_pred_ranfor)
+cm_knn=confusion_matrix(y_test,y_pred_knn)
+print(cm_ranfo)
+print('\n')
+print(cm_knn)#Classification Report
+from sklearn.metrics import classification_report
+print(classification_report(y_test,y_pred_ranfor))
+print(classification_report(y_test,y_pred_knn))model=ranfo
+import joblib
+joblib.dump(model,'Fertilizer_Recommend.pkl')
+print('Model Saved')
+
+model = scaler
+joblib.dump(model,'Fertilizer_scaler.pkl')
+print('Scaler Saved')
+# Test the fertilizer recommendation model with user input
+import pandas as pd
+
+# Load the saved model and scaler
+import joblib
+ranfo = joblib.load('Fertilizer_Recommend.pkl')
+scaler = joblib.load('Fertilizer_scaler.pkl')
+
+# Assuming label_encoders and mappings are defined earlier, but for simplicity, hardcode or load if saved
+# For demo, let's use sample input
+# In a real scenario, you'd load the encoders too
+
+# Sample user input
+temp = 25.0  # float(input("Enter temperature: "))
+humidity = 60.0  # float(input("Enter humidity: "))
+moisture = 40.0  # float(input("Enter moisture: "))
+nitrogen = 30  # float(input("Enter nitrogen: "))
+potassium = 20  # float(input("Enter potassium: "))
+phosphorous = 15  # float(input("Enter phosphorous: "))
+soil_type = 'Sandy'  # input("Enter soil type: ")
+crop_type = 'Maize'  # input("Enter crop type: ")
+
+# Encode categorical (assuming mappings from earlier)
+soil_mapping = {'Sandy': 0, 'Loamy': 1, 'Black': 2, 'Red': 3, 'Clayey': 4}  # Example, adjust based on actual
+crop_mapping = {'Maize': 0, 'Sugarcane': 1, 'Cotton': 2, 'Tobacco': 3, 'Paddy': 4, 'Barley': 5, 'Wheat': 6, 'Millets': 7, 'Oil seeds': 8, 'Pulses': 9, 'Ground Nuts': 10}  # Example
+
+soil_encoded = soil_mapping.get(soil_type, 0)
+crop_encoded = crop_mapping.get(crop_type, 0)
+
+# Scale numerical
+numerical_input = scaler.transform([[temp, humidity, moisture, nitrogen, potassium, phosphorous]])
+
+# Combine
+input_data = [numerical_input[0][0], numerical_input[0][1], numerical_input[0][2], numerical_input[0][3], numerical_input[0][4], numerical_input[0][5], soil_encoded, crop_encoded]
+input_df = pd.DataFrame([input_data], columns=['Temparature', 'Humidity', 'Moisture', 'Nitrogen', 'Potassium', 'Phosphorous', 'Soil_Type', 'Crop_Type'])
+
+prediction = ranfo.predict(input_df)
+fertilizer_mapping = {0: 'Urea', 1: 'DAP', 2: '14-35-14', 3: '28-28', 4: '17-17-17', 5: '20-20', 6: '10-26-26'}  # Example
+predicted_fertilizer = fertilizer_mapping.get(prediction[0], 'Unknown')
+
+print(f"Recommended Fertilizer: {predicted_fertilizer}")
